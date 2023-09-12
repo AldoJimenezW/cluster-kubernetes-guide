@@ -6,10 +6,8 @@ This repository contains detailed instructions and configuration files to help y
 - [Introduction](#introduction)
 - [Prerequisites](#prerequisites)
 - [Building the cluster](#building-the-cluster)
-  - [Running the script](#running-the-script)
   - [Configuring the static network](#configuring-the-static-network)
-  - [Setup the Cluster](#setup-the-cluster)
-- [Cluster Components](#cluster-components)
+  - [Running the script](#running-the-script)
 - [Usage](#usage)
   - [Deploying Applications](#deploying-applications)
   - [Scaling Workloads](#scaling-workloads)
@@ -68,7 +66,7 @@ Follow these steps to set up your Kubernetes cluster:
 
 ### Configuring the static network 
 
-To be able to define the static ip, we will have to define some parameters in the file: /etc/netplan/00-installer-config.yaml
+To be able to define the static ip, we will have to define some parameters in the file:``` /etc/netplan/00-installer-config.yaml```
 
 ```yaml
 network:
@@ -82,9 +80,24 @@ network:
         addresses: [1.1.1.1, 1.0.0.1]
   version: 2
 ``` 
-you can see your ethernet port by executing the command "ip a" in linux
+you can see your ethernet port by executing the command ```ip a``` in linux
 
 ### Running the script
 
 In this case we are using ubuntu server, so the delivered script to create our cluster is for the above mentioned operating system. 
 
+To run the script we need 2 things :
+ - be in sudo user (```sudo su```)
+ - give administrator permissions to the script (```chmod +x install.sh```)
+
+ Now we can run the script, it has the option to choose whether to configure the Head node, simply select this for the master node.
+
+ In order to join the worker nodes with the Head node, we have to use the command provided by the script. This is like this:
+
+```
+kubeadm join 192.168.0.100:6443 --token 8tchu0.jrgzw1owketyocrd --discovery-token-ca-cert-hash sha256:05b1fc56c15434e3a4f318e612095b2f4134cde27cdc1e8ff5589977eb957c16 --cri-socket=unix:///var/run/cri-dockerd.sock
+```
+
+## Usage
+
+Now that we have our cluster built correctly, we have to learn how to use it.
