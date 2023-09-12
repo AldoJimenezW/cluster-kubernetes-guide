@@ -6,8 +6,8 @@ This repository contains detailed instructions and configuration files to help y
 - [Introduction](#introduction)
 - [Prerequisites](#prerequisites)
 - [Building the cluster](#building-the-cluster)
-  - [Disable swap](#disable-swap)
-  - [Configure the Cluster](#configure-the-cluster)
+  - [Running the script](#running-the-script)
+  - [Configuring the static network](#configuring-the-static-network)
   - [Setup the Cluster](#setup-the-cluster)
 - [Cluster Components](#cluster-components)
 - [Usage](#usage)
@@ -59,44 +59,32 @@ Before you start building a Kubernetes cluster, ensure you meet the following pr
 - **Optional Ingress Controller**: If your applications will require external access via HTTP/HTTPS, consider setting up an Ingress controller such as Nginx Ingress or Traefik.
 
 
-Ensure that you thoroughly review the official [kubernetes](https://kubernetes.io/docs/home/) documentation and the documentation of any specific tools or plugins you plan to use, as requirements may vary depending on your environment and use case.
+Ensure that you thoroughly review the official [kubernetes](https://kubernetes.io/docs/home/) documentation and the documentation of any specific tools or plugins you plan to use, as requirements may vary dependin3g on your environment and use case.
 
 
 ## Building the cluster
 
 Follow these steps to set up your Kubernetes cluster:
 
-### Disable swap
+### Configuring the static network 
 
-We disable the swap for kubetel to function properly, first shutdown swap
+To be able to define the static ip, we will have to define some parameters in the file: /etc/netplan/00-installer-config.yaml
 
-```bash
-sudo swapoff -a
-```
+```yaml
+network:
+  ethernets:
+    <ethernet port>:
+      dhcp4: false
+      addresses:
+        - <ip address>
+      gateway4: <gateway>
+      nameservers:
+        addresses: [1.1.1.1, 1.0.0.1]
+  version: 2
+``` 
+you can see your ethernet port by executing the command "ip a" in linux
 
-and then we deactivate the swap, to do this we open the file /etc/fstab in a text editor
-```bash
-sudo vim /etc/fstab
-```
-there we will find this line 
-```
-/swap.img   none    swap    sw  0   0
-```
-and then we document the line 
+### Running the script
 
-```
-#/swap.img   none    swap    sw  0   0
-```
-
-### Install all kubernetes prerequisites 
-
-
-
-```bash
-git clone https://github.com/your-username/kubernetes-cluster.git
-```
-
-### Configure the cluster
-
-Edit the config.yaml file to customize your cluster settings. You can find an example configuration file in config.example.yaml
+In this case we are using ubuntu server, so the delivered script to create our cluster is for the above mentioned operating system. 
 
