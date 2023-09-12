@@ -97,6 +97,7 @@ To run the script we need 2 things :
 ```
 kubeadm join 192.168.0.100:6443 --token 8tchu0.jrgzw1owketyocrd --discovery-token-ca-cert-hash sha256:05b1fc56c15434e3a4f318e612095b2f4134cde27cdc1e8ff5589977eb957c16 --cri-socket=unix:///var/run/cri-dockerd.sock
 ```
+WARNING: it is very important to add the following argument at the end of the command:```--cri-socket=unix:///var/run/cri-dockerd.sock```
 
 ## Usage
 
