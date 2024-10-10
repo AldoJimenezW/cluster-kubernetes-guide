@@ -66,19 +66,22 @@ Follow these steps to set up your Kubernetes cluster:
 
 ### Configuring the static network 
 
-To be able to define the static ip, we will have to define some parameters in the file:``` /etc/netplan/00-installer-config.yaml```
+To be able to define the static ip, we will have to define some parameters in the file:``` /etc/netplan/<name_of_config.yaml>"```
 
 ```yaml
 network:
-  ethernets:
-    <ethernet port>:
-      dhcp4: false
-      addresses:
-        - <ip address>
-      gateway4: <gateway>
-      nameservers:
-        addresses: [1.1.1.1, 1.0.0.1]
-  version: 2
+    ethernets:
+        <ethernet port>:
+            dhcp4: no
+            addresses:
+              - <ip address>
+            gateway4: <gateway>
+            nameservers:
+              addresses:
+                - 8.8.8.8
+                - 8.8.4.4
+    version: 2
+    wifis: {}
 ``` 
 you can see your ethernet port by executing the command ```ip a``` in linux
 
@@ -102,3 +105,150 @@ WARNING: it is very important to add the following argument at the end of the co
 ## Usage
 
 Now that we have our cluster built correctly, we have to learn how to use it.
+
+### Concepts to Know
+
+- **Pod**: The smallest deployable unit in Kubernetes that contains one or more containers.
+- **Deployment**: Manages the deployment and scaling of Pods.
+- **Service**: Exposes Pods to the network, allowing external or internal access to your applications.
+- **Namespace**: A virtual environment in the cluster that groups resources and isolates applications.
+
+### Steps to Deploy and Test a Simple NGINX Application
+
+#### Step 1: Create a Deployment
+
+First, we will deploy an NGINX server as an example in your Kubernetes cluster.
+
+1. Create a deployment definition file called `nginx-deployment.yaml`:
+
+    ```bash
+    nano nginx-deployment.yaml
+    ```
+
+2. Paste the following content into the file:
+
+    ```yaml
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: nginx-deployment
+    spec:
+      replicas: 3
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:1.21
+            ports:
+            - containerPort: 80
+    ```
+
+    This defines a deployment that creates 3 replicas of the `nginx` server across your cluster.
+
+3. Apply the deployment:
+
+    ```bash
+    kubectl apply -f nginx-deployment.yaml
+    ```
+
+4. Verify that the Pods were created:
+
+    ```bash
+    kubectl get pods
+    ```
+
+    You should see output similar to:
+
+    ```plaintext
+    NAME                                READY   STATUS    RESTARTS   AGE
+    nginx-deployment-7b6894b6bb-xxxxx   1/1     Running   0          10s
+    nginx-deployment-7b6894b6bb-yyyyy   1/1     Running   0          10s
+    nginx-deployment-7b6894b6bb-zzzzz   1/1     Running   0          10s
+    ```
+
+#### Step 2: Expose the Deployment as a Service
+
+To access the NGINX application from outside the cluster, you need to create a **Service** that exposes the application on a NodePort.
+
+1. Create the service directly from the command line:
+
+    ```bash
+    kubectl expose deployment nginx-deployment --type=NodePort --name=nginx-service
+    ```
+
+2. Check the service created:
+
+    ```bash
+    kubectl get services
+    ```
+
+    You should see something like this:
+
+    ```plaintext
+    NAME            TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+    nginx-service   NodePort   10.96.0.1      <none>        80:32000/TCP   1m
+    ```
+
+    In this example, Kubernetes assigned the port `32000` to the service. This means you can access the application using any node's IP and port `32000`.
+
+#### Step 3: Test the Application
+
+1. Use `curl` or your browser to access the NGINX application by going to one of your node's IP addresses and the assigned port:
+
+    ```bash
+    curl http://<NODE_IP>:<PORT>
+    ```
+
+    For example, if the Node IP is `192.168.3.3` and the port is `32000`, run:
+
+    ```bash
+    curl http://192.168.3.3:32000
+    ```
+
+    You should see the default NGINX welcome page.
+
+#### Step 4: Scale the Deployment
+
+You can easily scale the deployment to increase the number of replicas, which will distribute the application across more nodes.
+
+1. To scale the deployment to 5 replicas:
+
+    ```bash
+    kubectl scale deployment nginx-deployment --replicas=5
+    ```
+
+2. Verify that new Pods have been created:
+
+    ```bash
+    kubectl get pods
+    ```
+
+    You should now see 5 Pods running.
+
+## Monitoring the Cluster
+
+Here are a few useful commands to monitor and manage your Kubernetes cluster:
+
+1. **View Nodes**:
+
+    ```bash
+    kubectl get nodes
+    ```
+
+2. **View Pods**:
+
+    ```bash
+    kubectl get pods
+    ```
+
+3. **View Cluster Info**:
+
+    ```bash
+    kubectl cluster-info
+    ```
