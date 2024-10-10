@@ -231,6 +231,60 @@ You can easily scale the deployment to increase the number of replicas, which wi
 
     You should now see 5 Pods running.
 
+### Step 1: Delete the Deployment
+
+A **Deployment** manages Pods and ensures that they are running as defined. To remove the deployment and its associated Pods:
+
+1. Use the following command to delete the deployment:
+
+    ```bash
+    kubectl delete deployment nginx-deployment
+    ```
+
+    This command will delete the `nginx-deployment` and all its associated Pods.
+
+2. Verify that the deployment and pods have been deleted:
+
+    ```bash
+    kubectl get deployments
+    ```
+
+    You should no longer see `nginx-deployment` listed.
+
+    To ensure all related Pods have been removed, run:
+
+    ```bash
+    kubectl get pods
+    ```
+
+    All Pods related to the `nginx-deployment` should be gone.
+
+### Step 2: Delete the Service
+
+If you exposed the deployment as a **Service** to make it accessible externally, you will need to remove the service as well.
+
+1. Use the following command to delete the service:
+
+    ```bash
+    kubectl delete service nginx-service
+    ```
+
+2. Verify the service has been deleted by running:
+
+    ```bash
+    kubectl get services
+    ```
+
+    You should no longer see `nginx-service` in the list.
+
+### Step 3: Verify that All Resources are Deleted
+
+To ensure all resources have been removed, you can check the status of all resources in the default namespace by running:
+
+```bash
+kubectl get all
+```
+
 ## Monitoring the Cluster
 
 Here are a few useful commands to monitor and manage your Kubernetes cluster:
